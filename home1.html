@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #d9534f;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .navbar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+        .navbar ul li {
+            margin: 0 15px;
+            cursor: pointer;
+        }
+        .navbar ul li:hover {
+            text-decoration: underline;
+        }
+        .logout {
+            cursor: pointer;
+            background-color: white;
+            color: #d9534f;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .profile {
+            font-size: 16px;
+            margin-right: 20px;
+        }
+        .main-content {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            margin: 20px auto;
+            width: 80%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .main-content h1 {
+            color: #333;
+        }
+        .chart-container {
+            width: 80%;
+            margin: auto;
+        }
+        .color-guide {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .alert-popup {
+            display: none;
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 5px;
+            text-align: center;
+        }
+        .alert-popup button {
+            margin-top: 10px;
+            background-color: #d9534f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body onload="showAlert()">
+    <div class="navbar">
+        <h2 class="logo">INCOSYS</h2>
+        <ul>
+            <li onclick="location.href='home1.html'">Dashboard</li>
+            <li onclick="location.href='inv.html'">Inventory</li>
+        </ul>
+        <a href="home.html" class="logout">Logout</a>
+    </div>
+    <div class="main-content">
+        <h1>Dashboard</h1>
+        <div class="chart-container">
+            <canvas id="inventoryChart"></canvas>
+        </div>
+        <div class="color-guide">
+            <div><span class="color-box" style="background-color: #ff6384;"></span> To Be Packed (#ff6384)</div>
+            <div><span class="color-box" style="background-color: #36a2eb;"></span> To Be Shipped (#36a2eb)</div>
+            <div><span class="color-box" style="background-color: #ffce56;"></span> To Be Delivered (#ffce56)</div>
+            <div><span class="color-box" style="background-color: #4bc0c0;"></span> To Be Invoiced (#4bc0c0)</div>
+        </div>
+    </div>
+    <div class="alert-popup" id="alertPopup">
+        <p><strong>Low stock alert:</strong> Only <span class="red">3</span> laptops left!</p>
+        <button onclick="closeAlert()">OK</button>
+    </div>
+    <script>
+        function showAlert() {
+            document.getElementById('alertPopup').style.display = 'block';
+        }
+        function closeAlert() {
+            document.getElementById('alertPopup').style.display = 'none';
+        }
+        var ctx = document.getElementById('inventoryChart').getContext('2d');
+        var inventoryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['To Be Packed', 'To Be Shipped', 'To Be Delivered', 'To Be Invoiced'],
+                datasets: [{
+                    label: 'Inventory Status',
+                    data: [228, 6, 10, 474],
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0']
+                }]
+            }
+        });
+    </script>
+</body>
+</html>

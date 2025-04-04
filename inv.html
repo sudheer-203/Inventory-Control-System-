@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #d9534f;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar ul {
+            list-style: none;
+            display: flex;
+            padding: 0;
+            margin: 0;
+        }
+        .navbar ul li {
+            margin: 0 15px;
+            cursor: pointer;
+        }
+        .logout {
+            cursor: pointer;
+            background-color: white;
+            color: #E57373;
+            padding: 8px;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+        .container {
+            display: flex;
+            margin: 20px;
+        }
+        .sidebar {
+            width: 200px;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .sidebar button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            cursor: pointer;
+            background-color: #d9534f;
+            border: none;
+            color: white;
+            font-weight: bold;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        .low-stock {
+            background-color: darkred;
+            color: white;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .popup input {
+            display: block;
+            margin: 10px 0;
+            padding: 8px;
+        }
+        .popup button {
+            margin-top: 10px;
+            padding: 8px;
+            cursor: pointer;
+            background-color: #5bc0de;
+            color: white;
+            border: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <h2 class="logo">INCOSYS</h2>
+        <ul>
+            <li onclick="window.location.href='home1.html'">Dashboard</li>
+            <li onclick="window.location.href='inv.html'">Inventory</li>
+        </ul>
+        <a href="home.html" class="logout">Logout</a>
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <button onclick="openPopup('add')">Add Item</button>
+            <button onclick="openPopup('modify')">Modify Item</button>
+            <button onclick="deleteSelected()">Delete Item</button>
+        </div>
+        <div class="content">
+            <table id="inventoryTable">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Item ID</th>
+                        <th>Item Name</th>
+                        <th>Quantity</th>
+                        <th>Threshold</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <div class="popup" id="itemPopup">
+        <h2 id="popupTitle">Add Item</h2>
+        <input type="text" id="itemId" placeholder="Item ID">
+        <input type="text" id="itemName" placeholder="Item Name">
+        <input type="number" id="itemQuantity" placeholder="Quantity" min="1">
+        <input type="number" id="itemThreshold" placeholder="Threshold" min="0">
+        <button onclick="saveItem()">Save</button>
+        <button onclick="closePopup()">Cancel</button>
+    </div>
+    <script>
+        function openPopup(action) {
+            let popup = document.getElementById('itemPopup');
+            document.getElementById('popupTitle').innerText = action === 'modify' ? 'Modify Item' : 'Add Item';
+
+            if (action === 'modify') {
+                let checkedItems = document.querySelectorAll('#inventoryTable tbody input:checked');
+
+                if (checkedItems.length === 0) {
+                    alert('Please select one item to modify.');
+                    return;
+                } else if (checkedItems.length > 1) {
+                    alert('You can only modify one item at a time.');
+                    return;
+                }
+
+                let row = checkedItems[0].closest('tr');
+                document.getElementById('itemId').value = row.cells[1].innerText;
+                document.getElementById('itemName').value = row.cells[2].innerText;
+                document.getElementById('itemQuantity').value = row.cells[3].innerText;
+                document.getElementById('itemThreshold').value = row.cells[4].innerText;
+            }
+
+            popup.style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('itemPopup').style.display = 'none';
+        }
+
+        function saveItem() {
+            let id = document.getElementById('itemId').value.trim();
+            let name = document.getElementById('itemName').value.trim();
+            let quantity = parseInt(document.getElementById('itemQuantity').value);
+            let threshold = parseInt(document.getElementById('itemThreshold').value);
+
+            if (!id || !name || isNaN(quantity) || quantity <= 0 || isNaN(threshold) || threshold < 0) {
+                alert('Invalid input! Ensure all fields are filled correctly.');
+                return;
+            }
+
+            let row = document.createElement('tr');
+            row.innerHTML = `<td><input type='checkbox'></td>
+                             <td>${id}</td>
+                             <td>${name}</td>
+                             <td>${quantity}</td>
+                             <td>${threshold}</td>`;
+
+            updateRowColor(row, quantity, threshold);
+
+            document.querySelector('#inventoryTable tbody').appendChild(row);
+            closePopup();
+        }
+
+        function saveModifiedItem() {
+            let checkedItems = document.querySelectorAll('#inventoryTable tbody input:checked');
+
+            if (checkedItems.length !== 1) {
+                alert('Error: Please select a single item to modify.');
+                return;
+            }
+
+            let row = checkedItems[0].closest('tr');
+            let newQuantity = parseInt(document.getElementById('itemQuantity').value);
+            let newThreshold = parseInt(document.getElementById('itemThreshold').value);
+
+            if (isNaN(newQuantity) || newQuantity <= 0 || isNaN(newThreshold) || newThreshold < 0) {
+                alert('Invalid input! Ensure quantity is positive and threshold is non-negative.');
+                return;
+            }
+
+            row.cells[2].innerText = document.getElementById('itemName').value;
+            row.cells[3].innerText = newQuantity;
+            row.cells[4].innerText = newThreshold;
+
+            updateRowColor(row, newQuantity, newThreshold);
+
+            document.getElementById('itemPopup').style.display = 'none';
+        }
+
+        function updateRowColor(row, quantity, threshold) {
+            if (quantity < threshold) {
+                row.classList.add('low-stock');
+            } else {
+                row.classList.remove('low-stock');
+            }
+        }
+
+        function deleteSelected() {
+            document.querySelectorAll('#inventoryTable tbody input:checked').forEach(cb => {
+                cb.closest('tr').remove();
+            });
+        }
+    </script>
+</body>
+</html>
